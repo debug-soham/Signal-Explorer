@@ -128,8 +128,8 @@ class MainWindow(QMainWindow):
         """ Redraws the time domain plot. """
         self.ax_time.clear()
         self.ax_time.plot(self.t, time_signal, color='#00AEEF', linewidth=2) # Thicker line
-        self.ax_time.set_title("Time Domain")
-        self.ax_time.set_xlabel("Time (s)"); self.ax_time.set_ylabel("Amplitude")
+        self.ax_time.set_title("Time Domain", color="#FFFFFF")
+        self.ax_time.set_xlabel("Time (s)", color="#FFFFFF"); self.ax_time.set_ylabel("Amplitude", color="#FFFFFF")
         self.ax_time.set_xlim(0, 0.5); self.ax_time.set_ylim(-11, 11)
         self.ax_time.grid(True, linestyle='--', color='#FFFFFF', alpha=0.15) # Fainter grid
         self.time_canvas.draw()
@@ -143,8 +143,8 @@ class MainWindow(QMainWindow):
         markerline.set_markerfacecolor('#00AEEF')
         markerline.set_markeredgecolor('#00AEEF')
         markerline.set_markersize(5)
-        self.ax_freq.set_title("Frequency Domain (FFT)")
-        self.ax_freq.set_xlabel("Frequency (Hz)"); self.ax_freq.set_ylabel("Magnitude")
+        self.ax_freq.set_title("Frequency Domain (FFT)", color="#FFFFFF")
+        self.ax_freq.set_xlabel("Frequency (Hz)", color="#FFFFFF"); self.ax_freq.set_ylabel("Magnitude", color="#FFFFFF")
         self.ax_freq.set_xlim(0, 120); self.ax_freq.set_ylim(0, 11)
         self.ax_freq.grid(True, linestyle='--', color='#FFFFFF', alpha=0.15)
         self.freq_canvas.draw()
