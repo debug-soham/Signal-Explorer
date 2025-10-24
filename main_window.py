@@ -3,9 +3,9 @@
 
 import numpy as np
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
-                             QSlider, QLabel, QFrame)
+                             QSlider, QLabel, QFrame, QComboBox)
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont # ## MODERN UI ## Import QFont for custom fonts
+from PyQt6.QtGui import QFont 
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -18,7 +18,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Signal Explorer")
-        self.setGeometry(100, 100, 1200, 800) # Increased width for the sidebar
+        self.setGeometry(100, 100, 1200, 800) 
 
         # --- Core Signal Parameters ---
         self.sampling_frequency = 500
@@ -39,7 +39,6 @@ class MainWindow(QMainWindow):
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
         
-        # ## MODERN UI ## Main layout is now HORIZONTAL to accommodate a sidebar.
         main_layout = QHBoxLayout(main_widget)
 
         # --- Plot Layout (Left Side) ---
@@ -57,12 +56,18 @@ class MainWindow(QMainWindow):
         plot_layout.addWidget(self.freq_canvas)
 
         # --- Controls Panel (Right Side) ---
-        # ## MODERN UI ## Create a dedicated vertical layout for controls.
         controls_layout = QVBoxLayout()
-        controls_layout.setSpacing(20) # Add nice spacing between control groups
+        controls_layout.setSpacing(20) 
+
+        # --- Waveform Controls ---
+        self.wave_label = QLabel("Waveform:")
+        self.wave_combo = QComboBox()
+        self.wave_combo.addItems(["Sine", "Square", "Triangle", "Sawtooth"])
+        controls_layout.addWidget(self.wave_label)
+        controls_layout.addWidget(self.wave_combo)
 
         # Amplitude Controls
-        self.amp_value_label = QLabel("Amplitude: 5.0") # Interactive value label
+        self.amp_value_label = QLabel("Amplitude: 5.0") 
         self.amp_slider = QSlider(Qt.Orientation.Horizontal); self.amp_slider.setRange(1, 100); self.amp_slider.setValue(50)
         controls_layout.addWidget(self.amp_value_label)
         controls_layout.addWidget(self.amp_slider)
@@ -79,12 +84,11 @@ class MainWindow(QMainWindow):
         controls_layout.addWidget(self.phase_value_label)
         controls_layout.addWidget(self.phase_slider)
         
-        controls_layout.addStretch() # Pushes controls to the top
+        controls_layout.addStretch() 
 
-        # Create a container widget for the controls to style them nicely.
         controls_container = QWidget()
         controls_container.setLayout(controls_layout)
-        controls_container.setFixedWidth(250) # Give the sidebar a fixed width
+        controls_container.setFixedWidth(250) 
 
         # --- Assemble Main Layout ---
         main_layout.addLayout(plot_layout)
@@ -95,12 +99,16 @@ class MainWindow(QMainWindow):
 
     def _connect_signals(self):
         """ Connects widget signals (e.g., slider moved) to slots (functions). """
+        self.wave_combo.currentTextChanged.connect(self.update_plots)
         self.amp_slider.valueChanged.connect(self.update_plots)
         self.freq_slider.valueChanged.connect(self.update_plots)
         self.phase_slider.valueChanged.connect(self.update_plots)
 
     def update_plots(self):
         """ This function is called whenever a slider value changes. """
+        # --- NEW: Get waveform type ---
+        waveform_type = self.wave_combo.currentText()
+        
         # Get values and update value labels
         amplitude = self.amp_slider.value() / 10.0
         self.amp_value_label.setText(f"Amplitude: {amplitude:.1f}")
@@ -117,7 +125,8 @@ class MainWindow(QMainWindow):
             frequency=frequency,
             phase_deg=phase_deg,
             time_vector=self.t,
-            sampling_freq=self.sampling_frequency
+            sampling_freq=self.sampling_frequency,
+            waveform_type=waveform_type
         )
 
         # Update the plots with the data returned by the logic function.
@@ -127,11 +136,11 @@ class MainWindow(QMainWindow):
     def _update_time_plot(self, time_signal):
         """ Redraws the time domain plot. """
         self.ax_time.clear()
-        self.ax_time.plot(self.t, time_signal, color='#00AEEF', linewidth=2) # Thicker line
+        self.ax_time.plot(self.t, time_signal, color='#00AEEF', linewidth=2) 
         self.ax_time.set_title("Time Domain", color="#FFFFFF")
         self.ax_time.set_xlabel("Time (s)", color="#FFFFFF"); self.ax_time.set_ylabel("Amplitude", color="#FFFFFF")
         self.ax_time.set_xlim(0, 0.5); self.ax_time.set_ylim(-11, 11)
-        self.ax_time.grid(True, linestyle='--', color='#FFFFFF', alpha=0.15) # Fainter grid
+        self.ax_time.grid(True, linestyle='--', color='#FFFFFF', alpha=0.15) 
         self.time_canvas.draw()
 
     def _update_freq_plot(self, freq_axis, freq_magnitude):
@@ -151,33 +160,40 @@ class MainWindow(QMainWindow):
 
     def _apply_styles(self):
         """ Applies a dark theme and custom styles to the app and plots. """
-        # ## MODERN UI ## Use a modern sans-serif font
         self.setFont(QFont("Segoe UI", 10)) 
         
+        # --- STYLESHEET ---
         self.setStyleSheet("""
             QMainWindow { background-color: #1E1E1E; }
             QWidget { background-color: #1E1E1E; color: #E0E0E0; }
             QLabel { font-weight: bold; font-size: 14px; }
             QSlider::groove:horizontal { border: 1px solid #444; height: 4px; background: #393939; border-radius: 2px; }
             QSlider::handle:horizontal { background-color: #00AEEF; border: 1px solid #00AEEF; width: 18px; margin: -8px 0; border-radius: 9px; }
+            
+            QComboBox {
+                border: 1px solid #444;
+                border-radius: 3px;
+                padding: 4px;
+                background-color: #393939;
+            }
+            QComboBox QAbstractItemView { /* The dropdown list */
+                border: 1px solid #444;
+                background-color: #393939;
+                selection-background-color: #00AEEF;
+            }
         """)
         
-        # ## MODERN UI ## This is the crucial fix for the plot text color.
-        # This loop styles both plots consistently.
         for ax in [self.ax_time, self.ax_freq]:
             ax.figure.set_facecolor('#1E1E1E')
             ax.set_facecolor('#1E1E1E')
             
-            # Set color for all text elements
             ax.title.set_color('white')
             ax.xaxis.label.set_color('white')
             ax.yaxis.label.set_color('white')
             ax.tick_params(axis='x', colors='white')
             ax.tick_params(axis='y', colors='white')
             
-            # Set color for plot borders (spines)
             ax.spines['left'].set_color('white')
             ax.spines['bottom'].set_color('white')
-            # Hide the top and right borders for a cleaner look
             ax.spines['top'].set_color('#1E1E1E')
             ax.spines['right'].set_color('#1E1E1E')
