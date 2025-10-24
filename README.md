@@ -1,6 +1,7 @@
 # Signal Explorer
-
 A desktop application built with PyQt6 and Matplotlib to visualize different waveforms in the time and frequency domains. This tool allows you to interactively adjust signal parameters and see how they affect the signal's shape and its corresponding Fast Fourier Transform (FFT).
+
+https://github.com/user-attachments/assets/2a2b30bb-73b9-4969-bdad-d1bc26f382a7
 
 ## Features
 * **Real-time Visualization:** See instant updates to the Time Domain and Frequency Domain plots as you adjust parameters.
@@ -16,14 +17,12 @@ A desktop application built with PyQt6 and Matplotlib to visualize different wav
 
 ## Requirements
 This project requires Python and the following libraries, which are listed in `requirements.txt`:
-
 * `numpy`
 * `PyQt6`
 * `matplotlib`
 * `scipy`
 
 ## How to Run
-
 1.  **Clone the repository:**
     ```bash
     git clone https://github.com/debug-soham/Signal-Explorer
